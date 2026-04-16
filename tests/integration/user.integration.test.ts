@@ -123,7 +123,6 @@ describe("User Integration Tests", () => {
       expect(response.status).toBe(200);
       expect(response.body.data).toHaveProperty("accessToken");
       expect(response.body.data).toHaveProperty("user");
-      // refreshToken is set in cookie, not in response body
       accessToken = response.body.data.accessToken;
     });
 
@@ -329,10 +328,7 @@ describe("User Integration Tests", () => {
     });
 
     it.skip("should generate new access token with valid refresh token", async () => {
-      // TODO: Fix cookie-based refresh token test
-      // The refresh endpoint expects refreshToken in cookies from login response
-      // Issue: Cookie not persisting between requests in supertest agent
-      // Workaround: Manually test with curl or postman for now
+     
       const agent = request.agent(app);
 
       // Register
