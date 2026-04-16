@@ -1,21 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { profileService } from "../src/services/profile.service.js";
 
 vi.mock("../src/utils/prismaClient.js", () => ({
   prisma: {
     user: {
       findUnique: vi.fn(),
-      update: vi.fn(),
     },
   },
 }));
 
 import { prisma } from "../src/utils/prismaClient.js";
 
-const mockUser = {
-  id: "user-1",
-  name: "John Doe",
+const mockProfile = {
+  id: 1,
+  name: "John",
   email: "john@example.com",
-  phoneNumber: "+1234567890",
+  phoneNumber: "1234567890",
   imageUrl: null,
   role: "USER" as const,
   createdAt: new Date(),
@@ -25,80 +25,25 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("Profile Tests", () => {
-  it("should retrieve user profile by id", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+describe("profileService", () => {
+  it("returns user profile when user exists", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockProfile as any);
 
-    const result = await prisma.user.findUnique({
-      where: { id: "user-1" },
+    const result = await profileService(1);
+
+    expect(result).toEqual(mockProfile);
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { id: 1 },
+      select: expect.objectContaining({ id: true, email: true }),
     });
-
-    expect(result).toEqual(mockUser);
-    expect(result.email).toBe("john@example.com");
   });
 
-  it("should not include password in profile response", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+  it("throws USER_NOT_FOUND when user does not exist", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
 
-    const result = await prisma.user.findUnique({
-      where: { id: "user-1" },
-    });
+    const error = await profileService(99).catch((e) => e);
 
-    expect(result).not.toHaveProperty("password");
-  });
-
-  it("should update user profile", async () => {
-    const updatedUser = {
-      ...mockUser,
-      name: "Jane Doe",
-      imageUrl: "https://example.com/profile.jpg",
-    };
-
-    vi.mocked(prisma.user.update).mockResolvedValue(updatedUser as any);
-
-    const result = await prisma.user.update({
-      where: { id: "user-1" },
-      data: {
-        name: "Jane Doe",
-        imageUrl: "https://example.com/profile.jpg",
-      },
-    });
-
-    expect(result.name).toBe("Jane Doe");
-    expect(result.imageUrl).toBe("https://example.com/profile.jpg");
-  });
-
-  it("should return 404 if user not found", () => {
-    const statusCode = 404;
-    const message = "User not found";
-
-    expect(statusCode).toBe(404);
-    expect(message).toBe("User not found");
-  });
-
-  it("should preserve immutable fields like createdAt", async () => {
-    const originalCreatedAt = mockUser.createdAt;
-
-    vi.mocked(prisma.user.update).mockResolvedValue(mockUser as any);
-
-    const result = await prisma.user.update({
-      where: { id: "user-1" },
-      data: { name: "Updated Name" },
-    });
-
-    expect(result.createdAt).toEqual(originalCreatedAt);
-  });
-
-  it("should allow updating imageUrl to null", async () => {
-    const userWithoutImage = { ...mockUser, imageUrl: null };
-
-    vi.mocked(prisma.user.update).mockResolvedValue(userWithoutImage as any);
-
-    const result = await prisma.user.update({
-      where: { id: "user-1" },
-      data: { imageUrl: null },
-    });
-
-    expect(result.imageUrl).toBeNull();
+    expect(error.message).toBe("USER_NOT_FOUND");
+    expect(error.statusCode).toBe(404);
   });
 });

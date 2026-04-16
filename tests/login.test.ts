@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Request, Response, NextFunction } from "express";
+import { loginService } from "../src/services/login.service.js";
 
 vi.mock("../src/utils/prismaClient.js", () => ({
   prisma: {
@@ -12,86 +12,76 @@ vi.mock("../src/utils/prismaClient.js", () => ({
 
 vi.mock("bcrypt", () => ({
   default: {
-    compare: vi.fn(() => true),
+    compare: vi.fn(),
   },
 }));
 
-vi.mock("jsonwebtoken", () => ({
-  default: {
-    sign: vi.fn(() => "mock-token"),
-  },
+vi.mock("../src/utils/jwt.js", () => ({
+  signAccessToken: vi.fn(() => "mock-access-token"),
+  signRefreshToken: vi.fn(() => "mock-refresh-token"),
 }));
 
 import { prisma } from "../src/utils/prismaClient.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 
 const mockUser = {
-  id: "user-1",
+  id: 1,
+  name: "John",
   email: "john@example.com",
   password: "hashed-password",
-  name: "John Doe",
-  phoneNumber: "+1234567890",
-  role: "USER" as const,
+  phoneNumber: "1234567890",
   imageUrl: null,
+  role: "USER" as const,
+  refreshToken: null,
   createdAt: new Date(),
+  updatedAt: new Date(),
 };
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("Login Tests", () => {
-  it("should fail with 404 if user not found", async () => {
+describe("loginService", () => {
+  it("throws USER_NOT_FOUND when user does not exist", async () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
 
-    const error = new Error("Invalid email or password");
-    (error as any).statusCode = 404;
-
-    expect(error.message).toBe("Invalid email or password");
-    expect((error as any).statusCode).toBe(404);
+    await expect(loginService("none@example.com", "pass")).rejects.toThrow(
+      "USER_NOT_FOUND",
+    );
   });
 
-  it("should fail with 401 if password doesn't match", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+  it("throws INVALID_CREDENTIALS when password is wrong", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
     vi.mocked(bcrypt.compare).mockResolvedValue(false as never);
 
-    const error = new Error("Invalid email or password");
-    (error as any).statusCode = 401;
-
-    expect(error.message).toBe("Invalid email or password");
-    expect((error as any).statusCode).toBe(401);
+    await expect(loginService("john@example.com", "wrong")).rejects.toThrow(
+      "INVALID_CREDENTIALS",
+    );
   });
 
-  it("should generate tokens on successful login", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+  it("returns tokens and safe user on success", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
     vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+    vi.mocked(prisma.user.update).mockResolvedValue(mockUser);
 
-    const accessToken = jwt.sign(
-      { userId: mockUser.id, role: mockUser.role },
-      "access_secret",
-      { expiresIn: "15m" }
-    );
+    const result = await loginService("john@example.com", "correct");
 
-    expect(accessToken).toBe("mock-token");
-    expect(jwt.sign).toHaveBeenCalled();
+    expect(result.accessToken).toBe("mock-access-token");
+    expect(result.refreshToken).toBe("mock-refresh-token");
+    expect(result.user).not.toHaveProperty("password");
+    expect(result.user).not.toHaveProperty("refreshToken");
   });
 
-  it("should return user data without password", () => {
-    const { password, ...userWithoutPassword } = mockUser;
+  it("saves refresh token to db on success", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser);
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+    vi.mocked(prisma.user.update).mockResolvedValue(mockUser);
 
-    expect(userWithoutPassword).not.toHaveProperty("password");
-    expect(userWithoutPassword).toHaveProperty("email");
-    expect(userWithoutPassword).toHaveProperty("id");
-  });
+    await loginService("john@example.com", "correct");
 
-  it("should set refreshToken in httpOnly cookie", () => {
-    const refreshToken = jwt.sign(
-      { userId: mockUser.id },
-      "refresh_secret",
-      { expiresIn: "7d" }
-    );
-
-    expect(refreshToken).toBe("mock-token");
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: mockUser.id },
+      data: { refreshToken: "mock-refresh-token" },
+    });
   });
 });
