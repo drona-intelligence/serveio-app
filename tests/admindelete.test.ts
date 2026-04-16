@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { deleteUserService } from "../src/services/admindelete.service.js";
 
 vi.mock("../src/utils/prismaClient.js", () => ({
   prisma: {
@@ -11,85 +12,45 @@ vi.mock("../src/utils/prismaClient.js", () => ({
 
 import { prisma } from "../src/utils/prismaClient.js";
 
-const mockUser = {
-  id: "user-1",
-  name: "John Doe",
-  email: "john@example.com",
-  phoneNumber: "+1234567890",
-  role: "USER",
-  imageUrl: null,
-  createdAt: new Date(),
-};
+const mockUser = { id: 2 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
+    vi.clearAllMocks();
 });
 
-describe("Admin Delete User Tests", () => {
-  it("should delete user by id", async () => {
-    vi.mocked(prisma.user.delete).mockResolvedValue(mockUser as any);
+describe("deleteUserService", () => {
+    it("throws USER_NOT_FOUND when user does not exist", async () => {
+        vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
 
-    const result = await prisma.user.delete({
-      where: { id: "user-1" },
+        const error = await deleteUserService(99).catch((e) => e);
+
+        expect(error.message).toBe("USER_NOT_FOUND");
+        expect(error.statusCode).toBe(404);
     });
 
-    expect(result.id).toBe("user-1");
-  });
+    it("deletes the user when found", async () => {
+        vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+        vi.mocked(prisma.user.delete).mockResolvedValue(mockUser as any);
 
-  it("should return deleted user data", async () => {
-    vi.mocked(prisma.user.delete).mockResolvedValue(mockUser as any);
+        await deleteUserService(2);
 
-    const result = await prisma.user.delete({
-      where: { id: "user-1" },
+        expect(prisma.user.delete).toHaveBeenCalledWith({
+            where: { id: 2 },
+        });
     });
 
-    expect(result).toEqual(mockUser);
-  });
+    it("does not call delete when user is not found", async () => {
+        vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
 
-  it("should return 404 if user not found", () => {
-    const statusCode = 404;
-    const message = "User not found";
+        await deleteUserService(99).catch(() => { });
 
-    expect(statusCode).toBe(404);
-    expect(message).toBe("User not found");
-  });
-
-  it("should return 403 if not admin role", () => {
-    const statusCode = 403;
-    const message = "Forbidden: Admin access required";
-
-    expect(statusCode).toBe(403);
-    expect(message).toBe("Forbidden: Admin access required");
-  });
-
-  it("should verify user exists before deletion", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
-
-    const userExists = await prisma.user.findUnique({
-      where: { id: "user-1" },
+        expect(prisma.user.delete).not.toHaveBeenCalled();
     });
 
-    expect(userExists).toBeDefined();
-    expect(userExists.id).toBe("user-1");
-  });
+    it("propagates db errors", async () => {
+        vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+        vi.mocked(prisma.user.delete).mockRejectedValue(new Error("DB error"));
 
-  it("should permanently remove user from database", async () => {
-    vi.mocked(prisma.user.delete).mockResolvedValue(mockUser as any);
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
-
-    await prisma.user.delete({
-      where: { id: "user-1" },
+        await expect(deleteUserService(2)).rejects.toThrow("DB error");
     });
-
-    const deletedUser = await prisma.user.findUnique({
-      where: { id: "user-1" },
-    });
-
-    expect(deletedUser).toBeNull();
-  });
-
-  it("should return 204 No Content on success", () => {
-    const statusCode = 204;
-    expect(statusCode).toBe(204);
-  });
 });
