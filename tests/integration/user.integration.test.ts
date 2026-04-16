@@ -329,10 +329,6 @@ describe("User Integration Tests", () => {
     });
 
     it.skip("should generate new access token with valid refresh token", async () => {
-      // TODO: Fix cookie-based refresh token test
-      // The refresh endpoint expects refreshToken in cookies from login response
-      // Issue: Cookie not persisting between requests in supertest agent
-      // Workaround: Manually test with curl or postman for now
       const agent = request.agent(app);
 
       // Register
