@@ -11,7 +11,7 @@ export const authenticate = (
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(400).json(apiError("No bearer token", 400));
+        return res.status(401).json(apiError("No bearer token", 401));
     }
 
     const token = authHeader.split(" ")[1];
