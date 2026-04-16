@@ -1,1 +1,1 @@
-export const adminDeleleteHandler = () => { }
+export const adminDeleteHandler = () => { }

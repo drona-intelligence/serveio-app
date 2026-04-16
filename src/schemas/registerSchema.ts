@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { Role } from "../../generated/prisma/enums.js";
 
 export const registerSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
@@ -14,7 +13,6 @@ export const registerSchema = z.object({
         .string()
         .regex(/^\+?[1-9]\d{7,14}$/, "Invalid phone number format"),
     imageUrl: z.string().url("Invalid image URL").optional(),
-    role: z.nativeEnum(Role).optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

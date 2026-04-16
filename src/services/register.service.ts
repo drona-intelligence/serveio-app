@@ -27,7 +27,6 @@ export const registerService = async (data: RegisterInput) => {
             password: hashedPassword,
             phoneNumber: data.phoneNumber,
             imageUrl: data.imageUrl ?? null,
-            ...(data.role && { role: data.role }),
         },
         select: {
             id: true,

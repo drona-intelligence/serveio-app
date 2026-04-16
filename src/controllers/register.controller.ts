@@ -1,6 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import { registerService } from "../services/register.service.js";
 import { registerSchema } from "../schemas/registerSchema.js";
+import { apiResponse } from "../utils/apiResponse.js";
+import { apiError } from "../utils/apiError.js";
 
 export const userRegisterHandler = async (
     req: Request,
@@ -11,21 +13,16 @@ export const userRegisterHandler = async (
         const result = registerSchema.safeParse(req.body);
 
         if (!result.success) {
-            return res.status(400).json({
-                message: "Validation failed",
-                errors: result.error.issues.map((e) => ({
-                    field: e.path.join("."),
-                    message: e.message,
-                })),
-            });
+            return res.status(400).json(
+                apiError("Validation failed", 400)
+            );
         }
 
         const user = await registerService(result.data);
 
-        return res.status(201).json({
-            message: "User registered successfully",
-            user,
-        });
+        return res.status(201).json(
+            apiResponse(user, "User registered successfully")
+        );
     } catch (error) {
         next(error);
     }

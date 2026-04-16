@@ -7,5 +7,5 @@ export const app = express()
 app.use(express.json())
 
 app.use('/api/v1/servio/user', userRouter)
-app.unsubscribe('/api/v1/servio/admin', adminRouter)
+app.use('/api/v1/servio/admin', adminRouter)
 app.use(errorMiddleware);
