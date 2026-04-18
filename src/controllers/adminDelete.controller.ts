@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { apiResponse } from "../utils/apiResponse.js";
 import { apiError } from "../utils/apiError.js";
-import { deleteUserService } from "../services/deleteUser.service.js";
+import { deleteUserService } from "../services/admindelete.service.js";
 
 export const adminDeleteHandler = async (
     req: Request,
