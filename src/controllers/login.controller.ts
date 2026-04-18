@@ -27,7 +27,7 @@ export const userLoginHandler = async (
 
         return res.status(200).json(apiResponse({ accessToken, user }, "Login successful"));
     } catch (err) {
-        if (err instanceof Error && err.message === "USER_NOT_FOUND") {
+        if (err instanceof Error && (err.message === "USER_NOT_FOUND" || err.message === "INVALID_CREDENTIALS")) {
             return res.status(401).json(apiError("Invalid email or password", 401));
         }
         next(err);
