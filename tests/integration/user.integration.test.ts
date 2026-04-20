@@ -328,7 +328,6 @@ describe("User Integration Tests", () => {
     });
 
     it.skip("should generate new access token with valid refresh token", async () => {
-     
       const agent = request.agent(app);
 
       // Register
