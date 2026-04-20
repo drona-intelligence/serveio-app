@@ -123,7 +123,6 @@ describe("User Integration Tests", () => {
       expect(response.status).toBe(200);
       expect(response.body.data).toHaveProperty("accessToken");
       expect(response.body.data).toHaveProperty("user");
-      // refreshToken is set in cookie, not in response body
       accessToken = response.body.data.accessToken;
     });
 
