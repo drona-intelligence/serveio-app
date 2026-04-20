@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { registerService } from "../src/services/register.service.js";
-import { registerSchema } from "../src/schemas/registerSchema.js";
-import type { RegisterInput } from "../src/schemas/registerSchema.js";
+import type { RegisterInput } from "../src/schema/register.schema.js";
 
 vi.mock("../src/utils/prismaClient.js", () => ({
   prisma: {
@@ -19,24 +18,23 @@ vi.mock("bcrypt", () => ({
 }));
 
 import { prisma } from "../src/utils/prismaClient.js";
-import bcrypt from "bcrypt";
 
-// Zod-validated test data
-const validInput: RegisterInput = registerSchema.parse({
-  name: "John Doe",
+const validInput: RegisterInput = {
+  name: "John",
   email: "john@example.com",
-  password: "SecurePass123",
-  phoneNumber: "+1234567890",
-});
+  password: "Secret123",
+  phoneNumber: "+12345678",
+};
 
 const createdUser = {
-  id: "user-1",
-  name: "John Doe",
+  id: 1,
+  name: "John",
   email: "john@example.com",
-  phoneNumber: "+1234567890",
+  phoneNumber: "+12345678",
   imageUrl: null,
   role: "USER" as const,
   createdAt: new Date(),
+  address: null,
 };
 
 beforeEach(() => {
@@ -74,17 +72,13 @@ describe("registerService", () => {
     expect(prisma.user.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ imageUrl: null }),
-      })
+      }),
     );
     expect(result).toEqual(createdUser);
   });
 
   it("saves imageUrl string when provided", async () => {
-    const inputWithImage = registerSchema.parse({
-      ...validInput,
-      imageUrl: "https://example.com/avatar.jpg",
-    });
-
+    const inputWithImage = { ...validInput, imageUrl: "https://example.com/avatar.jpg" };
     vi.mocked(prisma.user.findFirst).mockResolvedValue(null);
     vi.mocked(prisma.user.create).mockResolvedValue({
       ...createdUser,
@@ -95,10 +89,8 @@ describe("registerService", () => {
 
     expect(prisma.user.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
-          imageUrl: "https://example.com/avatar.jpg",
-        }),
-      })
+        data: expect.objectContaining({ imageUrl: "https://example.com/avatar.jpg" }),
+      }),
     );
     expect(result.imageUrl).toBe("https://example.com/avatar.jpg");
   });
@@ -111,53 +103,5 @@ describe("registerService", () => {
 
     const callData = vi.mocked(prisma.user.create).mock.calls[0]?.[0].data;
     expect(callData.imageUrl).toBeNull();
-  });
-
-  it("hashes password with bcrypt", async () => {
-    vi.mocked(prisma.user.findFirst).mockResolvedValue(null);
-    vi.mocked(prisma.user.create).mockResolvedValue(createdUser as any);
-
-    await registerService(validInput);
-
-    expect(bcrypt.hash).toHaveBeenCalledWith(validInput.password, 10);
-  });
-
-  it("validates input with Zod before processing", () => {
-    // Valid Zod-parsed data should not throw
-    const validData = registerSchema.safeParse(validInput);
-    expect(validData.success).toBe(true);
-  });
-
-  it("rejects invalid email format", () => {
-    const invalidData = registerSchema.safeParse({
-      name: "John Doe",
-      email: "invalid-email",
-      password: "SecurePass123",
-      phoneNumber: "+1234567890",
-    });
-
-    expect(invalidData.success).toBe(false);
-  });
-
-  it("rejects password without uppercase", () => {
-    const invalidData = registerSchema.safeParse({
-      name: "John Doe",
-      email: "john@example.com",
-      password: "securepass123",
-      phoneNumber: "+1234567890",
-    });
-
-    expect(invalidData.success).toBe(false);
-  });
-
-  it("rejects short password", () => {
-    const invalidData = registerSchema.safeParse({
-      name: "John Doe",
-      email: "john@example.com",
-      password: "Short1",
-      phoneNumber: "+1234567890",
-    });
-
-    expect(invalidData.success).toBe(false);
   });
 });

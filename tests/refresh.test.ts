@@ -1,132 +1,94 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { refreshService } from "../src/services/refresh.service.js";
 
 vi.mock("../src/utils/prismaClient.js", () => ({
   prisma: {
     user: {
       findUnique: vi.fn(),
+      update: vi.fn(),
     },
   },
 }));
 
-vi.mock("jsonwebtoken", () => ({
-  default: {
-    verify: vi.fn(),
-    sign: vi.fn(() => "new-access-token"),
-  },
+vi.mock("../src/utils/jwt.js", () => ({
+  verifyRefreshToken: vi.fn(() => ({ userId: 1, role: "USER" })),
+  signAccessToken: vi.fn(() => "new-access-token"),
+  signRefreshToken: vi.fn(() => "new-refresh-token"),
 }));
 
 import { prisma } from "../src/utils/prismaClient.js";
-import jwt from "jsonwebtoken";
+import { verifyRefreshToken } from "../src/utils/jwt.js";
 
 const mockUser = {
-  id: "user-1",
-  email: "john@example.com",
-  name: "John Doe",
-  phoneNumber: "+1234567890",
+  id: 1,
   role: "USER" as const,
-  imageUrl: null,
   refreshToken: "valid-refresh-token",
-  createdAt: new Date(),
 };
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("Refresh Token Tests", () => {
-  it("should return 401 if refreshToken is missing", () => {
-    const statusCode = 401;
-    const message = "Refresh token not provided";
-
-    expect(statusCode).toBe(401);
-    expect(message).toBe("Refresh token not provided");
-  });
-
-  it("should verify refreshToken validity", async () => {
-    vi.mocked(jwt.verify).mockImplementation(() => ({
-      userId: mockUser.id,
-    }));
-
-    const decoded = jwt.verify(
-      mockUser.refreshToken,
-      "refresh_secret"
-    ) as any;
-
-    expect(decoded.userId).toBe("user-1");
-  });
-
-  it("should return 401 if token is invalid", () => {
-    const statusCode = 401;
-    const message = "Invalid refresh token";
-
-    expect(statusCode).toBe(401);
-    expect(message).toBe("Invalid refresh token");
-  });
-
-  it("should return 401 if token has expired", () => {
-    const statusCode = 401;
-    const message = "Refresh token expired";
-
-    expect(statusCode).toBe(401);
-    expect(message).toBe("Refresh token expired");
-  });
-
-  it("should generate new access token on valid refresh", async () => {
-    vi.mocked(jwt.verify).mockImplementation(() => ({
-      userId: mockUser.id,
-    }));
-
-    const newAccessToken = jwt.sign(
-      { userId: mockUser.id, role: mockUser.role },
-      "access_secret",
-      { expiresIn: "15m" }
-    );
-
-    expect(newAccessToken).toBe("new-access-token");
-    expect(jwt.sign).toHaveBeenCalled();
-  });
-
-  it("should find user after token verification", async () => {
-    vi.mocked(jwt.verify).mockImplementation(() => ({
-      userId: mockUser.id,
-    }));
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
-
-    const decoded = jwt.verify(
-      mockUser.refreshToken,
-      "refresh_secret"
-    ) as any;
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+describe("refreshService", () => {
+  it("throws if verifyRefreshToken throws (invalid/expired token)", async () => {
+    vi.mocked(verifyRefreshToken).mockImplementationOnce(() => {
+      throw new Error("jwt expired");
     });
 
-    expect(user).toEqual(mockUser);
+    await expect(refreshService("bad-token")).rejects.toThrow("jwt expired");
   });
 
-  it("should return 404 if user not found after token verification", async () => {
-    vi.mocked(jwt.verify).mockImplementation(() => ({
-      userId: "user-1",
-    }));
+  it("throws USER_NOT_FOUND when user does not exist in db", async () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
 
-    const decoded = jwt.verify(
-      "valid-token",
-      "refresh_secret"
-    ) as any;
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-    });
+    const error = await refreshService("valid-refresh-token").catch((e) => e);
 
-    expect(user).toBeNull();
+    expect(error.message).toBe("USER_NOT_FOUND");
+    expect(error.statusCode).toBe(404);
   });
 
-  it("should return new access token with correct expiry", () => {
-    const accessToken = jwt.sign(
-      { userId: mockUser.id },
-      "access_secret",
-      { expiresIn: "15m" }
-    );
+  it("throws INVALID_REFRESH_TOKEN when token does not match db", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      ...mockUser,
+      refreshToken: "different-token",
+    } as any);
 
-    expect(accessToken).toBe("new-access-token");
+    const error = await refreshService("valid-refresh-token").catch((e) => e);
+
+    expect(error.message).toBe("INVALID_REFRESH_TOKEN");
+    expect(error.statusCode).toBe(401);
+  });
+
+  it("returns new access and refresh tokens on success", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+    vi.mocked(prisma.user.update).mockResolvedValue(mockUser as any);
+
+    const result = await refreshService("valid-refresh-token");
+
+    expect(result.accessToken).toBe("new-access-token");
+    expect(result.refreshToken).toBe("new-refresh-token");
+  });
+
+  it("stores the new refresh token in the db", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+    vi.mocked(prisma.user.update).mockResolvedValue(mockUser as any);
+
+    await refreshService("valid-refresh-token");
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: mockUser.id },
+      data: { refreshToken: "new-refresh-token" },
+    });
+  });
+
+  it("does not update db when token is invalid", async () => {
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({
+      ...mockUser,
+      refreshToken: "different-token",
+    } as any);
+
+    await refreshService("valid-refresh-token").catch(() => {});
+
+    expect(prisma.user.update).not.toHaveBeenCalled();
   });
 });
