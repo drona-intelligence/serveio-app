@@ -4,6 +4,7 @@
   "description": "This is restaurant management web app.",
   "main": "index.js",
   "scripts": {
+    "build": "tsc -b",
     "dev": "tsc -b && node --env-file=.env dist/src/server.js",
     "test": "vitest run",
     "test:watch": "vitest",
