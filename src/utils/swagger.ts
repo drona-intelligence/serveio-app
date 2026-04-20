@@ -36,7 +36,7 @@ const options = {
           type: "object",
           properties: {
             id: {
-              type: "string",
+              type: "integer",
               description: "User ID",
             },
             name: {
@@ -59,7 +59,7 @@ const options = {
             },
             role: {
               type: "string",
-              enum: ["USER", "ADMIN"],
+              enum: ["USER", "OWNER", "ADMIN"],
               description: "User role",
             },
             createdAt: {

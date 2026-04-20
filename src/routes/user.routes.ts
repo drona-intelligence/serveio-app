@@ -113,8 +113,6 @@ userRouter.post('/logout', authenticate, userLogoutHandler)
  *       - User Authentication
  *     summary: Refresh access token
  *     description: Generate a new access token using refresh token from cookies
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Token refreshed successfully
@@ -138,7 +136,7 @@ userRouter.post('/logout', authenticate, userLogoutHandler)
  *       401:
  *         description: Unauthorized - Invalid or missing refresh token
  */
-userRouter.post('/refresh', authenticate, refreshUserHandler)
+userRouter.post('/refresh', refreshUserHandler)
 
 /**
  * @swagger
