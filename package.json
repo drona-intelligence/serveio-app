@@ -1,0 +1,56 @@
+{
+  "name": "serveio-app",
+  "version": "1.0.0",
+  "description": "This is restaurant management web app.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsc -b && node --env-file=.env dist/src/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run tests/integration",
+    "test:integration:watch": "vitest tests/integration",
+    "test:unit": "vitest run tests --exclude tests/integration"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drona-intelligence/serveio-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/drona-intelligence/serveio-app/issues"
+  },
+  "homepage": "https://github.com/drona-intelligence/serveio-app#readme",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "^7.7.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.20.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "typescript": "^6.0.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "@types/supertest": "^7.2.0",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@vitest/coverage-v8": "^4.1.4",
+    "@vitest/ui": "^4.1.4",
+    "prisma": "^7.7.0",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.4"
+  }
+}
