@@ -39,8 +39,8 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/serveio-userService-backend:latest .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/serveio-userservice-api:latest .
 
       - name: Push Docker Image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/serveio-userService-backend:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/serveio-userservice-api:latest
