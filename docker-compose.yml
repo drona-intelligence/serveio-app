@@ -5,13 +5,14 @@ services:
       - .env
     environment:
       PORT: ${PORT:-3000}
-      DATABASE_URL: postgresql://serveio:serveio@db:5432/serveio?schema=public
+      DATABASE_URL: postgresql://serveiouser:serveiopass@db:5432/serveio-users-db?schema=public
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET in .env}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET in .env}
-    ports: "3000:3000"
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_started
 
   db:
     image: postgres:16-alpine
@@ -24,7 +25,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U serveio -d serveio"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
