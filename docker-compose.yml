@@ -1,6 +1,6 @@
 services:
   users-service-api:
-    image: dronahub/serveio-userservice-api
+    image: dronahub/serveio-userservice-api:latest
     env_file:
       - .env
     environment:
