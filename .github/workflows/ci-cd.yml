@@ -22,7 +22,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: users-service/package-lock.json
       - run: npm ci
       - run: npx prisma generate
       - run: npm run build
