@@ -24,7 +24,7 @@ export const authenticate = (
             role: payload.role as Role,
         };
 
-        next();        docker run -d -p 3000:3000 --name users-application dronahub/serveio-userservice-api:latest
+        next();        
     } catch (error) {
         return res.status(401).json(apiError("Invalid or expired token", 401));
     }
