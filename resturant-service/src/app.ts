@@ -1,6 +1,6 @@
-import express, { Express } from "express";
-
-export const app: Express = express();
+import express from 'express'
+import { menuRouter } from './routes/menu.routes';
+export const app = express();
 
 // Middleware
 app.use(express.json());
@@ -8,9 +8,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // API Routes
-app.get("/api/menus", (req, res) => {
-  res.json({ message: "Get all menus" });
-});
+app.use("/api/v1/servio/menus", menuRouter);
 
 // Error handling middleware
 app.use((err: any, req: any, res: any, next: any) => {
