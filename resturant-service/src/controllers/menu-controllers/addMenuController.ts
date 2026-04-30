@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
-import { addMenuSchema } from "../schemas/restaurant.schemas";
-import { addMenuService } from "../services/addMenu.service";
-import { apiResponse } from "../utils/apiResponse";
-import { apiError } from "../utils/apiError";
+import { addMenuSchema } from "../../schemas/restaurant.schemas";
+import { addMenuService } from "../../services/menu-services/addMenu.service";
+import { apiResponse } from "../../utils/apiResponse";
+import { apiError } from "../../utils/apiError";
 
 export const addMenuHandler = async (req: Request, res: Response) => {
     const parsed = addMenuSchema.safeParse(req.body);

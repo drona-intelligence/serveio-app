@@ -1,4 +1,4 @@
-import { prisma } from "../utils/prismaClient";
+import { prisma } from "../../utils/prismaClient";
 
 export const deleteMenuService = async (id: string) => {
     const existing = await prisma.menu.findUnique({ where: { id } });

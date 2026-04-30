@@ -1,4 +1,4 @@
-import { prisma } from "../utils/prismaClient";
+import { prisma } from "../../utils/prismaClient";
 
 export const getByIdMenuSevice = async (id: string) => {
     const menu = await prisma.menu.findUnique({

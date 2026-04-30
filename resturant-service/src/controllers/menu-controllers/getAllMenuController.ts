@@ -1,7 +1,7 @@
 import type { Request, Response } from "express"
-import { apiResponse, } from "../utils/apiResponse"
-import { apiError } from "../utils/apiError"
-import { allMenuService } from "../services/allMenu.service"
+import { apiResponse, } from "../../utils/apiResponse"
+import { apiError } from "../../utils/apiError"
+import { allMenuService } from "../../services/menu-services/allMenu.service"
 
 export const getAllMenuHandler = async (req: Request, res: Response) => {
     try {
