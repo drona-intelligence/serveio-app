@@ -1,7 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import { apiError } from "../utils/apiError.js";
-import type { Role } from "../../generated/prisma/enums.js";
-import { verifyAccessToken } from "../utils/jwt.js";
+import { verifyAccessToken } from "../utils/jwt";
+
+type Role = "USER" | "OWNER" | "ADMIN";
 
 export const authenticate = (
     req: Request,
@@ -24,8 +25,7 @@ export const authenticate = (
             role: payload.role as Role,
         };
 
-
-        next();        
+        next();
     } catch (error) {
         return res.status(401).json(apiError("Invalid or expired token", 401));
     }

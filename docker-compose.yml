@@ -21,7 +21,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
@@ -30,5 +30,24 @@ services:
       timeout: 5s
       retries: 10
 
+
+  restaurantservice-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${RESTAURANT_DB}
+      POSTGRES_USER: ${RESTAURANT_USER}
+      POSTGRES_PASSWORD: ${RESTAURANT_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - restaurant_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${RESTAURANT_USER} -d $${RESTAURANT_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   db_data:
+  restaurant_db_data:
+
