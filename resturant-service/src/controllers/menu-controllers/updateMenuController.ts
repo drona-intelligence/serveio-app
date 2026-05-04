@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
-import { updateMenuSchema } from "../schemas/restaurant.schemas";
-import { updateMenuService } from "../services/updateMenu.service";
-import { apiResponse } from "../utils/apiResponse";
-import { apiError } from "../utils/apiError";
+import { updateMenuSchema } from "../../schemas/restaurant.schemas";
+import { apiError } from "../../utils/apiError";
+import { updateMenuService } from "../../services/menu-services/updateMenu.service";
+import { apiResponse } from "../../utils/apiResponse";
 
 export const updateMenuHandler = async (req: Request, res: Response) => {
     const { id } = req.params;

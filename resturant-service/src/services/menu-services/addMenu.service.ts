@@ -1,5 +1,5 @@
-import { prisma } from "../utils/prismaClient";
-import type { AddMenuInput } from "../schemas/restaurant.schemas";
+import { prisma } from "../../utils/prismaClient";
+import type { AddMenuInput } from "../../schemas/restaurant.schemas";
 
 export const addMenuService = async (data: AddMenuInput) => {
     const menu = await prisma.menu.create({

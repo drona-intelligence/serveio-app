@@ -1,5 +1,5 @@
-import { prisma } from "../utils/prismaClient";
-import type { UpdateMenuInput } from "../schemas/restaurant.schemas";
+import { prisma } from "../../utils/prismaClient";
+import type { UpdateMenuInput } from "../../schemas/restaurant.schemas";
 
 export const updateMenuService = async (id: string, data: UpdateMenuInput) => {
     const existing = await prisma.menu.findUnique({ where: { id } });

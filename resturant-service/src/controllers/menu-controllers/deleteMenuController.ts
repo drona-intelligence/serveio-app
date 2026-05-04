@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { deleteMenuService } from "../services/deleteMenu.service";
-import { apiResponse } from "../utils/apiResponse";
-import { apiError } from "../utils/apiError";
+import { deleteMenuService } from "../../services/menu-services/deleteMenu.service";
+import { apiResponse } from "../../utils/apiResponse";
+import { apiError } from "../../utils/apiError";
 
 export const deleteMenuHandler = async (req: Request, res: Response) => {
     const { id } = req.params;

@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { getByIdMenuSevice } from "../services/getByIdMenu.service";
-import { apiResponse } from "../utils/apiResponse";
-import { apiError } from "../utils/apiError";
+import { getByIdMenuSevice } from "../../services/menu-services/getByIdMenu.service";
+import { apiResponse } from "../../utils/apiResponse";
+import { apiError } from "../../utils/apiError";
 
 export const getByIdMenuHandler = async (req: Request, res: Response) => {
     const { id } = req.params;
