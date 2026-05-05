@@ -46,8 +46,26 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+  
+
+  cartservice-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${CART_DB}
+      POSTGRES_USER: ${CART_USER}
+      POSTGRES_PASSWORD: ${CART_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - cart_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${CART_USER} -d $${CART_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   db_data:
   restaurant_db_data:
+  cart_db_data:
 
