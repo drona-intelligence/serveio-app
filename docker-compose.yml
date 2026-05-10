@@ -25,11 +25,24 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
 
+  restaurant-service-api:
+    image: ${DOCKERHUB_USERNAME}/serveio-restaurantservice-api:latest
+    env_file:
+      - .env
+    environment:
+      PORT: ${RESTAURANT_PORT:-3001}
+      DATABASE_URL: postgresql://${RESTAURANT_USER}:${RESTAURANT_PASSWORD}@restaurantservice-db:5432/${RESTAURANT_DB}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET in .env}
+    ports:
+      - "${RESTAURANT_PORT:-3001}:${RESTAURANT_PORT:-3001}"
+    depends_on:
+      restaurantservice-db:
+        condition: service_started
 
   restaurantservice-db:
     image: postgres:16-alpine
@@ -42,11 +55,10 @@ services:
     volumes:
       - restaurant_db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${RESTAURANT_USER} -d $${RESTAURANT_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${RESTAURANT_USER} -d ${RESTAURANT_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
-  
 
   cartservice-db:
     image: postgres:16-alpine
@@ -59,7 +71,7 @@ services:
     volumes:
       - cart_db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${CART_USER} -d $${CART_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${CART_USER} -d ${CART_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -68,4 +80,3 @@ volumes:
   db_data:
   restaurant_db_data:
   cart_db_data:
-

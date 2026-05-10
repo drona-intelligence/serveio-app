@@ -1,0 +1,12 @@
+node_modules
+dist
+.dist
+generated/prisma
+.env
+.env.*
+*.log
+*.tsbuildinfo
+.git
+.gitignore
+.dockerignore
+README.md
