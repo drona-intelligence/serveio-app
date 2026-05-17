@@ -2,7 +2,13 @@ import express from 'express'
 import { menuRouter } from './routes/menu.routes';
 import { categoryRouter } from './routes/category.routes';
 import { menuItemsRouter } from './routes/menu-items.routes';
+import cors from 'cors'
 export const app = express();
+
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS?.split(",") || "http://localhost:5173",
+  credentials: true,
+}));
 
 // Middleware
 app.use(express.json());
