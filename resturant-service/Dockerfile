@@ -5,14 +5,11 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies (Prisma client generates automatically via postinstall)
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
-
-# Generate Prisma Client (with dummy DATABASE_URL for build)
-RUN DATABASE_URL="postgresql://user:password@localhost:5432/dummy" npm run prisma:generate || true
 
 # Build TypeScript
 RUN npm run build
