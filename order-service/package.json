@@ -1,7 +1,7 @@
 {
-  "name": "cart-service",
+  "name": "order-service",
   "version": "1.0.0",
-  "description": "Cart management microservice for Serveio",
+  "description": "Order management microservice for Serveio",
   "main": "index.js",
   "scripts": {
     "build": "tsc -b",
@@ -30,10 +30,12 @@
     "@prisma/client": "^7.7.0",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "bullmq": "^5.14.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.20.0",
+    "redis": "^4.7.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "typescript": "^6.0.2"
