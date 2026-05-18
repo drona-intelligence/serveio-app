@@ -3,7 +3,6 @@ import * as LabelPrimitive from "@radix-ui/react-label"
 import { Slot } from "@radix-ui/react-slot"
 import {
   Controller,
-  type ControllerRenderProps,
   type FieldPath,
   type FieldValues,
   FormProvider,
