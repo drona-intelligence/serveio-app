@@ -6,13 +6,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
 
-# Generate Prisma Client
-RUN npm run prisma:generate
+# Generate Prisma Client explicitly
+RUN npx prisma generate
 
 # Build TypeScript
 RUN npm run build

@@ -1,0 +1,46 @@
+{
+  "name": "notification-service",
+  "version": "1.0.0",
+  "description": "Notification service for Serveio - consumes order events and sends notifications",
+  "main": "dist/src/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/src/server.js",
+    "start:worker": "node dist/src/config/worker.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration"
+  },
+  "keywords": [
+    "notification",
+    "bullmq",
+    "redis",
+    "order-events"
+  ],
+  "author": "Serveio",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.0.0",
+    "bullmq": "^5.14.1",
+    "ioredis": "^5.3.2",
+    "dotenv": "^16.3.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/express": "^4.17.21",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.6",
+    "@types/supertest": "^7.2.0",
+    "@vitest/coverage-v8": "^1.0.4",
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0",
+    "vitest": "^1.0.4",
+    "supertest": "^6.3.4"
+  }
+}

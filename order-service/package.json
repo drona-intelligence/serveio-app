@@ -1,7 +1,7 @@
 {
-  "name": "cart-service",
+  "name": "order-service",
   "version": "1.0.0",
-  "description": "Cart management microservice for Serveio",
+  "description": "Order management microservice for Serveio",
   "main": "index.js",
   "scripts": {
     "build": "tsc -b",
@@ -34,6 +34,7 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.20.0",
+    "redis": "^4.7.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "typescript": "^6.0.2"
@@ -43,10 +44,11 @@
     "@types/supertest": "^7.2.0",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.6",
-    "@vitest/coverage-v8": "^3.5.0",
+    "@vitest/coverage-v8": "^4.1.6",
+    "bullmq": "^5.76.10",
     "supertest": "^6.3.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
-    "vitest": "^3.5.0"
+    "vitest": "^4.1.6"
   }
 }
