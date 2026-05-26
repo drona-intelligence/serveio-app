@@ -49,7 +49,7 @@ const Landing = () => {
 
         <div className="relative z-10 text-center px-4">
           <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-4">
-            Servieo
+            Serveio
           </h1>
 
           <p className="text-white/80 text-lg mb-8 max-w-xl">
