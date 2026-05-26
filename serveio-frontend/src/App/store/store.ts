@@ -7,6 +7,9 @@ import authreducer from '../slices/authslice'
 import { authApi } from '../apis/authApi'
 import { profileApi } from '../apis/profileApi'
 import { adminApi } from '../apis/adminApi'
+import { cartApi } from '../apis/cartApi'
+import { orderApi } from '../apis/orderApi'
+import { notificationApi } from '../apis/notificationApi'
 
 export const store = configureStore({
     reducer: {
@@ -18,7 +21,10 @@ export const store = configureStore({
         [categoryApi.reducerPath]: categoryApi.reducer,
         [menuItemsApi.reducerPath]: menuItemsApi.reducer,
         [profileApi.reducerPath]: profileApi.reducer,
-        [adminApi.reducerPath]: adminApi.reducer
+        [adminApi.reducerPath]: adminApi.reducer,
+        [cartApi.reducerPath]: cartApi.reducer,
+        [orderApi.reducerPath]: orderApi.reducer,
+        [notificationApi.reducerPath]: notificationApi.reducer,
 
     },
     middleware: (getDefaultMiddleware) =>
@@ -28,7 +34,10 @@ export const store = configureStore({
             menuItemsApi.middleware,
             profileApi.middleware,
             authApi.middleware,
-            adminApi.middleware
+            adminApi.middleware,
+            cartApi.middleware,
+            orderApi.middleware,
+            notificationApi.middleware,
         ),
 })
 
