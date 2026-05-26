@@ -30,7 +30,7 @@ export const updateItemHandler = async (
       return res.status(400).json(apiError("Quantity must be a non-negative number", 400));
     }
 
-    const cartItem = await updateItemService(userId, itemId, { quantity });
+    const cartItem = await updateItemService(userId, itemId as string, { quantity });
 
     // If quantity was 0, item is deleted
     if (cartItem === null) {

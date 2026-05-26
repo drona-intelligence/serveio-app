@@ -17,7 +17,7 @@ vi.mock('../../src/utils/prismaClient.js', () => ({
 
 import { prismaClient as prisma } from '../../src/utils/prismaClient.js';
 
-const mockUserId = 'user-123';
+const mockUserId = 123;
 const mockCart = {
   id: 'cart-1',
   userId: mockUserId,
