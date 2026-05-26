@@ -1,8 +1,11 @@
+// getCartItems.service.ts
 import { prismaClient as prisma } from "../utils/prismaClient.js";
 
-export const getCartItemsService = async (userId: string) => {
+export const getCartItemsService = async (userId: number) => {
   const cart = await prisma.cart.findUnique({
-    where: { userId },
+    where: {
+      userId
+    },
     include: {
       items: true,
     },

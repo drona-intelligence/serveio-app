@@ -13,7 +13,7 @@ export interface CartSummary {
   cartTotal: number;
 }
 
-export const getCartSummaryService = async (userId: string): Promise<CartSummary> => {
+export const getCartSummaryService = async (userId: number): Promise<CartSummary> => {
   // Find user's cart with items
   const cart = await prisma.cart.findUnique({
     where: { userId },
@@ -31,7 +31,7 @@ export const getCartSummaryService = async (userId: string): Promise<CartSummary
   }
 
   // Calculate item totals and cart total
-  const items: CartItemSummary[] = cart.items.map((item) => ({
+  const items: CartItemSummary[] = cart.items.map((item: any) => ({
     itemId: item.itemId,
     name: item.name,
     price: item.price,

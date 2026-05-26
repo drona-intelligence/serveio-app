@@ -14,14 +14,14 @@ export const authenticate = (
   }
 
   const token = authHeader.split(" ")[1];
-  
+
   if (!token) {
     return res.status(401).json(apiError("No token", 401));
   }
 
   try {
     const payload = verifyAccessToken(token);
-    req.user = { userId: payload.userId };
+    req.user = { userId: Number(payload.userId) };
     next();
   } catch (error) {
     return res.status(401).json(apiError("Invalid token", 401));
