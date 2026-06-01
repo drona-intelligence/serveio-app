@@ -21,7 +21,7 @@ export const removeItemHandler = async (
       return res.status(400).json(apiError("Missing required parameter: itemId", 400));
     }
 
-    const removedItem = await removeItemService(userId, itemId);
+    const removedItem = await removeItemService(userId, itemId as string);
 
     return res.status(200).json(apiResponse(removedItem, "Item removed from cart"));
   } catch (error: any) {

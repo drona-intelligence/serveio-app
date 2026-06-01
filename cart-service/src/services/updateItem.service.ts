@@ -5,7 +5,7 @@ export interface UpdateItemInput {
 }
 
 export const updateItemService = async (
-  userId: string,
+  userId: number,
   itemId: string,
   input: UpdateItemInput,
 ) => {
@@ -21,7 +21,7 @@ export const updateItemService = async (
   // Find the cart item
   const cartItem = await prisma.cartItem.findFirst({
     where: {
-      id: itemId,
+      itemId: itemId,
       cartId: cart.id,
     },
   });
@@ -33,14 +33,14 @@ export const updateItemService = async (
   // If quantity is 0, delete the item
   if (input.quantity === 0) {
     await prisma.cartItem.delete({
-      where: { id: itemId },
+      where: { id: cartItem.id },
     });
     return null;
   }
 
   // Update the quantity
   return await prisma.cartItem.update({
-    where: { id: itemId },
+    where: { id: cartItem.id },
     data: {
       quantity: input.quantity,
     },
