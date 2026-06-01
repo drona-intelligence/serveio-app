@@ -1,6 +1,9 @@
 services:
   users-service-api:
-    image: dronahub/serveio-userservice-api:latest
+    build:
+      context: ./users-service
+      dockerfile: Dockerfile
+    container_name: serveio-users-service
     env_file:
       - .env
     environment:
@@ -12,7 +15,9 @@ services:
       - "${PORT:-3000}:${PORT:-3000}"
     depends_on:
       userservice-db:
-        condition: service_started
+        condition: service_healthy
+    networks:
+      - serveio-network
 
   userservice-db:
     image: postgres:16-alpine
@@ -29,9 +34,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - serveio-network
 
   restaurant-service-api:
-    image: ${DOCKERHUB_USERNAME}/serveio-restaurantservice-api:latest
+    build:
+      context: ./resturant-service
+      dockerfile: Dockerfile
+    container_name: serveio-restaurant-service
     env_file:
       - .env
     environment:
@@ -42,10 +52,13 @@ services:
       - "${RESTAURANT_PORT:-3001}:${RESTAURANT_PORT:-3001}"
     depends_on:
       restaurantservice-db:
-        condition: service_started
+        condition: service_healthy
+    networks:
+      - serveio-network
 
   restaurantservice-db:
     image: postgres:16-alpine
+    container_name: serveio-restaurant-db
     environment:
       POSTGRES_DB: ${RESTAURANT_DB}
       POSTGRES_USER: ${RESTAURANT_USER}
@@ -59,22 +72,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-
-  cartservice-db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: ${CART_DB}
-      POSTGRES_USER: ${CART_USER}
-      POSTGRES_PASSWORD: ${CART_PASSWORD}
-    ports:
-      - "5434:5432"
-    volumes:
-      - cart_db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${CART_USER} -d ${CART_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+    networks:
+      - serveio-network
 
   cart-service-api:
     build:
@@ -91,23 +90,28 @@ services:
       - "3002:3002"
     depends_on:
       cartservice-db:
-        condition: service_started
+        condition: service_healthy
+    networks:
+      - serveio-network
+  cartservice-db:
+    image: postgres:16-alpine
+    container_name: serveio-cart-db
+    environment:
+      POSTGRES_DB: ${CART_DB}
+      POSTGRES_USER: ${CART_USER}
+      POSTGRES_PASSWORD: ${CART_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - cart_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CART_USER} -d ${CART_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - serveio-network
 
-  redis:
-    image: redis:7-alpine
-    container_name: serveio-redis
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
 
   order-service-api:
     build:
@@ -128,7 +132,7 @@ services:
       redis:
         condition: service_healthy
       orderservice-db:
-        condition: service_started
+        condition: service_healthy
     networks:
       - serveio-network
 
@@ -171,11 +175,25 @@ services:
         condition: service_healthy
     networks:
       - serveio-network
+  redis:
+    image: redis:7-alpine
+    container_name: serveio-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - serveio-network
 
 networks:
   serveio-network:
     driver: bridge
-
 volumes:
   db_data:
   restaurant_db_data:

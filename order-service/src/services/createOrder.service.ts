@@ -47,7 +47,7 @@ export const createOrderService = async (
     eventType: "ORDER_CREATED",
     orderId: order.id,
     userId: order.userId,
-    items: order.items.map((item) => ({
+    items: order.items.map((item: any) => ({
       id: item.id,
       itemId: item.itemId,
       name: item.name,

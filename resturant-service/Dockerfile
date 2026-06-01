@@ -1,24 +1,20 @@
-FROM node:20-alpine
+# Use Node.js 22 on a lightweight Alpine Linux base
+FROM node:22-alpine
 
+# Install OpenSSL (required by Prisma)
+RUN apk add --no-cache openssl
+
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm install --legacy-peer-deps
-
-# Copy source code
+# Copy all project files
 COPY . .
 
-# Generate Prisma Client explicitly
-RUN npx prisma generate
+# Install dependencies
+RUN npm install
 
-# Build TypeScript
-RUN npm run build
+# Generate Prisma client and compile TypeScript
+RUN npx prisma generate && npx tsc -b
 
-# Expose port
-EXPOSE 3001
-
-# Start the application
-CMD ["npm", "start"]
+# Start the server
+CMD ["node", "dist/server.js"]

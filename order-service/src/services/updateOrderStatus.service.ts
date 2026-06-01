@@ -1,9 +1,8 @@
-import { prismaClient as prisma } from "../utils/prismaClient.js";
+import { prismaClient as prisma, OrderStatus } from "../utils/prismaClient.js";
 import { publishOrderStatusUpdated } from "../config/queue.js";
-import type { OrderStatus } from "@prisma/client";
 
 // Valid status transitions
-const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+const VALID_TRANSITIONS: Record<string, string[]> = {
   PENDING: ["CONFIRMED", "CANCELLED"],
   CONFIRMED: ["PREPARING", "CANCELLED"],
   PREPARING: ["READY", "CANCELLED"],
@@ -34,7 +33,7 @@ export const updateOrderStatusService = async (
   }
 
   // Validate status transition
-  const allowedTransitions = VALID_TRANSITIONS[order.status];
+  const allowedTransitions = VALID_TRANSITIONS[order.status] || [];
   if (!allowedTransitions.includes(newStatus)) {
     throw new Error(
       `INVALID_STATUS_TRANSITION_${order.status}_TO_${newStatus}`

@@ -32,7 +32,7 @@ export const createOrderEventsWorker = () => {
 
         const event = job.data;
 
-        if (job.name === "ORDER_CREATED") {
+        if (job.name === "ORDER_CREATED" && event.eventType === "ORDER_CREATED") {
           console.log(`\n✅ ORDER_CREATED Event Received:`);
           console.log(`   Order ID: ${event.orderId}`);
           console.log(`   User ID: ${event.userId}`);
@@ -40,7 +40,7 @@ export const createOrderEventsWorker = () => {
           console.log(`   Items Count: ${event.items.length}`);
 
           // Example: Log items in the order
-          event.items.forEach((item, index) => {
+          event.items.forEach((item: any, index: number) => {
             console.log(
               `   Item ${index + 1}: ${item.name} x${item.quantity} @ $${item.price}`
             );
@@ -63,7 +63,7 @@ export const createOrderEventsWorker = () => {
           // ======================================================
 
           console.log(`\n✨ ORDER_CREATED event processed successfully\n`);
-        } else if (job.name === "ORDER_STATUS_UPDATED") {
+        } else if (job.name === "ORDER_STATUS_UPDATED" && event.eventType === "ORDER_STATUS_UPDATED") {
           console.log(`\n✅ ORDER_STATUS_UPDATED Event Received:`);
           console.log(`   Order ID: ${event.orderId}`);
           console.log(`   Status: ${event.status}`);
