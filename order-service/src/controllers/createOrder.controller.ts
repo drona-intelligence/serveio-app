@@ -9,10 +9,16 @@ export const createOrderHandler = async (
   next: NextFunction,
 ) => {
   try {
-    const userId = req.user?.userId;
+    const userIdFromAuth = req.user?.userId;
 
-    if (!userId) {
+    if (!userIdFromAuth) {
       return res.status(401).json(apiError("Unauthorized", 401));
+    }
+
+    const userId = typeof userIdFromAuth === 'string' ? parseInt(userIdFromAuth, 10) : userIdFromAuth;
+
+    if (isNaN(userId)) {
+      return res.status(400).json(apiError("Invalid user ID", 400));
     }
 
     const { items } = req.body;

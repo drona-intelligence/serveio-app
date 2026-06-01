@@ -32,7 +32,7 @@ export const createOrderEventsWorker = () => {
 
         const event = job.data;
 
-        if (job.name === "ORDER_CREATED") {
+        if (event.eventType === "ORDER_CREATED") {
           console.log(`\n✅ ORDER_CREATED Event Received:`);
           console.log(`   Order ID: ${event.orderId}`);
           console.log(`   User ID: ${event.userId}`);
@@ -63,7 +63,7 @@ export const createOrderEventsWorker = () => {
           // ======================================================
 
           console.log(`\n✨ ORDER_CREATED event processed successfully\n`);
-        } else if (job.name === "ORDER_STATUS_UPDATED") {
+        } else if (event.eventType === "ORDER_STATUS_UPDATED") {
           console.log(`\n✅ ORDER_STATUS_UPDATED Event Received:`);
           console.log(`   Order ID: ${event.orderId}`);
           console.log(`   Status: ${event.status}`);
