@@ -37,7 +37,6 @@
     "pg": "^8.20.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
-    "vitest": "^4.1.7",
     "yaml": "^2.9.0"
   },
   "devDependencies": {
@@ -48,6 +47,7 @@
     "prisma": "^7.8.0",
     "supertest": "^6.3.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.7"
   }
 }

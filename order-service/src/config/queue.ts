@@ -6,7 +6,7 @@ const REDIS_PORT = parseInt(process.env.REDIS_PORT || "6379");
 export interface OrderCreatedEvent {
   eventType: "ORDER_CREATED";
   orderId: string;
-  userId: string;
+  userId: number;
   items: Array<{
     id: string;
     itemId: string;

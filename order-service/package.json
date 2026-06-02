@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/drona-intelligence/serveio-app#readme",
   "dependencies": {
+    "@bull-board/express": "^7.1.5",
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "@types/express": "^5.0.6",
@@ -37,7 +38,8 @@
     "redis": "^4.7.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@types/pg": "^8.20.0",
@@ -46,6 +48,7 @@
     "@types/swagger-ui-express": "^4.1.6",
     "@vitest/coverage-v8": "^4.1.6",
     "bullmq": "^5.76.10",
+    "prisma": "^7.8.0",
     "supertest": "^6.3.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
