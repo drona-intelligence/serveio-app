@@ -31,6 +31,17 @@ export const notificationWorker = new Worker<OrderEvent>(
 
         console.log(`   ✓ Real-time notification emitted → user:${userId}`);
 
+        // Notify admins when a new order is created
+        io.to("admin").emit("order:created", {
+          orderId,
+          totalAmount,
+          itemCount: items.length,
+          message: `A new order #${orderId} has been placed and needs admin review.`,
+          timestamp: new Date().toISOString(),
+        });
+
+        console.log("   ✓ Real-time order created notification emitted → admin");
+
       } else if (job.name === EventType.ORDER_STATUS_UPDATED) {
         const { orderId, userId, status, previousStatus, updatedAt } = eventData as any;
 
@@ -48,6 +59,18 @@ export const notificationWorker = new Worker<OrderEvent>(
         });
 
         console.log(`   ✓ Real-time notification emitted → user:${userId}`);
+
+        if (status === "CANCELLED") {
+          io.to("admin").emit("order:status_updated", {
+            orderId,
+            status,
+            previousStatus,
+            updatedAt,
+            message: `Order #${orderId} has been cancelled and should be reviewed by admin`,
+            timestamp: new Date().toISOString(),
+          });
+          console.log(`   ✓ Real-time cancellation notification emitted → admin`);
+        }
 
       } else {
         console.log("⚠️  Unknown event type, skipping");

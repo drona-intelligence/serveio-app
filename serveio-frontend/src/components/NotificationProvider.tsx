@@ -10,7 +10,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   // Initialize WebSocket connection when user is authenticated
   useEffect(() => {
     if (isAuthenticated && user?.id) {
-      socketService.connect(user.id.toString());
+      socketService.connect(user.id.toString(), user.role);
     }
 
     return () => {
@@ -18,7 +18,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         socketService.disconnect();
       }
     };
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id, user?.role]);
 
   // Use the order notifications hook
   useOrderNotifications();

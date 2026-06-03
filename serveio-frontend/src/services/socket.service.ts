@@ -6,7 +6,7 @@ class SocketService {
   private socket: Socket | null = null;
   private userId: string | null = null;
 
-  connect(userId: string) {
+  connect(userId: string, role?: string) {
     if (this.socket?.connected) {
       return;
     }
@@ -21,8 +21,11 @@ class SocketService {
     });
 
     this.socket.on('connect', () => {
-      // Register user room
-      this.socket?.emit('register', userId);
+      // Register user room and optional admin room
+      this.socket?.emit('register', {
+        userId,
+        role,
+      });
     });
 
     this.socket.on('disconnect', () => {
@@ -36,7 +39,10 @@ class SocketService {
     this.socket.on('reconnect', () => {
       // Re-register user room after reconnection
       if (this.userId) {
-        this.socket?.emit('register', this.userId);
+        this.socket?.emit('register', {
+          userId: this.userId,
+          role: role,
+        });
       }
     });
   }
