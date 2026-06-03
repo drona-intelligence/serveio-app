@@ -1,21 +1,113 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, vi } from "vitest";
+import { randomUUID } from "crypto";
+import { generateTestToken, mockCartItems } from "./helpers.js";
+
+interface MockOrderItem {
+  id: string;
+  orderId: string;
+  itemId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  createdAt: Date;
+}
+
+interface MockOrder {
+  id: string;
+  userId: number;
+  status: string;
+  totalAmount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  items: MockOrderItem[];
+}
+
+const mockOrders = new Map<string, MockOrder>();
+
+const createOrderRecord = (data: any): MockOrder => {
+  const orderId = randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const createdAt = new Date();
+  const items = (data.items?.create ?? []).map((item: any, index: number) => ({
+    id: `${orderId}-item-${index + 1}`,
+    orderId,
+    itemId: item.itemId,
+    name: item.name,
+    price: item.price,
+    quantity: item.quantity,
+    createdAt,
+  }));
+
+  const order: MockOrder = {
+    id: orderId,
+    userId: data.userId,
+    status: data.status ?? "PENDING",
+    totalAmount: data.totalAmount,
+    createdAt,
+    updatedAt: createdAt,
+    items,
+  };
+
+  mockOrders.set(orderId, order);
+  return order;
+};
+
+vi.mock("../src/utils/prismaClient.js", () => ({
+  prismaClient: {
+    order: {
+      create: vi.fn(async ({ data }: any) => createOrderRecord(data)),
+      findMany: vi.fn(async ({ where }: any) =>
+        Array.from(mockOrders.values()).filter(
+          (order) => order.userId === where.userId
+        )
+      ),
+      findUnique: vi.fn(async ({ where }: any) => mockOrders.get(where.id) ?? null),
+      update: vi.fn(async ({ where, data }: any) => {
+        const existing = mockOrders.get(where.id);
+        if (!existing) {
+          return null;
+        }
+
+        const updatedOrder = {
+          ...existing,
+          ...data,
+          updatedAt: new Date(),
+        };
+
+        mockOrders.set(existing.id, updatedOrder);
+        return updatedOrder;
+      }),
+    },
+  },
+}));
+
+vi.mock("../src/config/queue.js", () => ({
+  publishOrderCreated: vi.fn(async () => undefined),
+  publishOrderStatusUpdated: vi.fn(async () => undefined),
+  orderEventsQueue: {
+    add: vi.fn(async () => undefined),
+  },
+}));
+
+vi.mock("../src/config/queue-dashboard.js", () => ({
+  bullBoardRouter: (req: any, res: any, next: any) => next(),
+}));
+
 import request from "supertest";
 import app from "../src/app.js";
-import { generateTestToken, mockCartItems } from "./helpers.js";
 
 describe("Order Service API", () => {
   let testToken: string;
-  let testUserId: string;
+  let testUserId: number;
   let adminToken: string;
   let customerToken: string;
   let ownerToken: string;
 
   beforeAll(() => {
-    testUserId = "test-user-123";
+    testUserId = 123;
     testToken = generateTestToken(testUserId);
-    adminToken = generateTestToken("admin-user-123", "ADMIN");
-    customerToken = generateTestToken("customer-user-456", "USER");
-    ownerToken = generateTestToken("owner-user-789", "OWNER");
+    adminToken = generateTestToken(456, "ADMIN");
+    customerToken = generateTestToken(789, "USER");
+    ownerToken = generateTestToken(987, "OWNER");
   });
 
   describe("POST /api/v1/serveio/orders - Create Order", () => {
@@ -98,7 +190,7 @@ describe("Order Service API", () => {
 
   describe("GET /api/v1/serveio/orders - Get User Orders", () => {
     it("should return empty array when user has no orders", async () => {
-      const newUserId = "new-user-456";
+      const newUserId = 456;
       const newToken = generateTestToken(newUserId);
 
       const response = await request(app)
@@ -157,7 +249,7 @@ describe("Order Service API", () => {
     });
 
     it("should return 403 when accessing another user's order", async () => {
-      const otherUserId = "other-user-789";
+      const otherUserId = 789;
       const otherToken = generateTestToken(otherUserId);
 
       const response = await request(app)

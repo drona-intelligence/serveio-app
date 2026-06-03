@@ -18,7 +18,7 @@ enum OrderStatus {
 
 model Order {
   id        String   @id @default(uuid())
-  userId    String
+  userId    Int
 
   status    OrderStatus @default(PENDING)
   totalAmount Float

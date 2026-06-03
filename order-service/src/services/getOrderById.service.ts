@@ -1,6 +1,6 @@
 import { prismaClient as prisma } from "../utils/prismaClient.js";
 
-export const getOrderByIdService = async (userId: string, orderId: string) => {
+export const getOrderByIdService = async (userId: number, orderId: string) => {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: {

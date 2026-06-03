@@ -20,7 +20,11 @@ export const createOrderEventsWorker = () => {
         const event = job.data;
 
         if (event.eventType === "ORDER_CREATED") {
+<<<<<<< HEAD
           console.log(`\n ORDER_CREATED Event Received:`);
+=======
+          console.log(`\n✅ ORDER_CREATED Event Received:`);
+>>>>>>> 4477febedabc1647274dbac818c317dfd1f4b6a8
           console.log(`   Order ID: ${event.orderId}`);
           console.log(`   User ID: ${event.userId}`);
           console.log(`   Total Amount: $${event.totalAmount}`);
@@ -39,9 +43,26 @@ export const createOrderEventsWorker = () => {
           console.log(`\n Sending to kitchen display system...`);
           console.log(`\n Processing payment of $${event.totalAmount}...`);
 
+<<<<<<< HEAD
           console.log(`\n ORDER_CREATED event processed successfully\n`);
         } else if (event.eventType === "ORDER_STATUS_UPDATED") {
           console.log(`\n ORDER_STATUS_UPDATED Event Received:`);
+=======
+          // Example 2: Update inventory in restaurant-service
+          console.log(`\n📦 Updating inventory...`);
+
+          // Example 3: Send to kitchen display system
+          console.log(`\n🍳 Sending to kitchen display system...`);
+
+          // Example 4: Trigger payment processing
+          console.log(`\n💳 Processing payment of $${event.totalAmount}...`);
+
+          // ======================================================
+
+          console.log(`\n✨ ORDER_CREATED event processed successfully\n`);
+        } else if (event.eventType === "ORDER_STATUS_UPDATED") {
+          console.log(`\n✅ ORDER_STATUS_UPDATED Event Received:`);
+>>>>>>> 4477febedabc1647274dbac818c317dfd1f4b6a8
           console.log(`   Order ID: ${event.orderId}`);
           console.log(`   Status: ${event.status}`);
           if (event.previousStatus) {

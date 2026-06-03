@@ -9,7 +9,7 @@ export interface OrderItemInput {
 }
 
 export const createOrderService = async (
-  userId: string,
+  userId: number,
   cartItems: OrderItemInput[]
 ) => {
   if (!cartItems || cartItems.length === 0) {
