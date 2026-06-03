@@ -1,23 +1,14 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { RootState } from "../store/store";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQueryWithAuth } from "./baseQuery";
 
 export const cartApi = createApi({
     reducerPath: "cartApi",
-    baseQuery: fetchBaseQuery({
-        baseUrl: `${import.meta.env.VITE_CART_API_BASE_URL}`,
-        prepareHeaders: (headers, { getState }) => {
-            const token = (getState() as RootState).auth.accessToken;
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
-            return headers;
-        },
-    }),
+    baseQuery: baseQueryWithAuth(`${import.meta.env.VITE_CART_API_BASE_URL}`),
     tagTypes: ["Cart"],
     endpoints: (builder) => ({
         getCart: builder.query({
             query: () => ({
-                url: "cart",
+                url: "cart/items",
                 method: "GET",
             }),
             providesTags: ["Cart"],
@@ -25,7 +16,7 @@ export const cartApi = createApi({
 
         addToCart: builder.mutation({
             query: (data) => ({
-                url: "cart/add",
+                url: "cart/items",
                 method: "POST",
                 body: data,
             }),
@@ -34,7 +25,7 @@ export const cartApi = createApi({
 
         removeFromCart: builder.mutation({
             query: (itemId) => ({
-                url: `cart/remove/${itemId}`,
+                url: `cart/items/${itemId}`,
                 method: "DELETE",
             }),
             invalidatesTags: ["Cart"],
@@ -42,17 +33,9 @@ export const cartApi = createApi({
 
         updateCartItem: builder.mutation({
             query: ({ itemId, quantity }) => ({
-                url: `cart/update/${itemId}`,
+                url: `cart/items/${itemId}`,
                 method: "PUT",
                 body: { quantity },
-            }),
-            invalidatesTags: ["Cart"],
-        }),
-
-        clearCart: builder.mutation({
-            query: () => ({
-                url: "cart/clear",
-                method: "DELETE",
             }),
             invalidatesTags: ["Cart"],
         }),
@@ -64,5 +47,4 @@ export const {
     useAddToCartMutation,
     useRemoveFromCartMutation,
     useUpdateCartItemMutation,
-    useClearCartMutation,
 } = cartApi;

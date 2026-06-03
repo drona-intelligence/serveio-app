@@ -15,11 +15,11 @@ export const updateItemHandler = async (
       return res.status(401).json(apiError("Unauthorized", 401));
     }
 
-    const { itemId } = req.params;
+    const { itemId: cartItemId } = req.params;
     const { quantity } = req.body;
 
-    if (!itemId) {
-      return res.status(400).json(apiError("Missing required field: itemId", 400));
+    if (!cartItemId) {
+      return res.status(400).json(apiError("Missing required field: cartItemId", 400));
     }
 
     if (quantity === undefined) {
@@ -30,7 +30,7 @@ export const updateItemHandler = async (
       return res.status(400).json(apiError("Quantity must be a non-negative number", 400));
     }
 
-    const cartItem = await updateItemService(userId, itemId as string, { quantity });
+    const cartItem = await updateItemService(userId, cartItemId as string, { quantity });
 
     // If quantity was 0, item is deleted
     if (cartItem === null) {

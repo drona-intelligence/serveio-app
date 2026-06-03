@@ -2,8 +2,8 @@ import { configureStore } from '@reduxjs/toolkit'
 import { menuApi } from '../apis/menuApi'
 import { categoryApi } from '../apis/categoryApi'
 import { menuItemsApi } from '../apis/menuItemsApi'
-import cartreducer from '../slices/cartslice'
 import authreducer from '../slices/authslice'
+import notificationreducer from '../slices/notificationSlice'
 import { authApi } from '../apis/authApi'
 import { profileApi } from '../apis/profileApi'
 import { adminApi } from '../apis/adminApi'
@@ -13,8 +13,8 @@ import { notificationApi } from '../apis/notificationApi'
 
 export const store = configureStore({
     reducer: {
-        cart: cartreducer,
         auth: authreducer,
+        notifications: notificationreducer,
 
         [authApi.reducerPath]: authApi.reducer,
         [menuApi.reducerPath]: menuApi.reducer,

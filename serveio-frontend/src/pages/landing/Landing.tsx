@@ -1,8 +1,20 @@
 import { Star, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroFood from "../../assets/food.jpg";
+import { useGetAllMenusQuery } from "@/App/apis/menuApi";
+import { useGetMenuItemsForCategoryQuery } from "@/App/apis/menuItemsApi";
+import type { MenuItem } from "@/types/types";
 
-const FOOD_CARDS = [
+type PopularFoodCard = {
+  id: string | number;
+  name: string;
+  category: string;
+  rating: number;
+  time: string;
+  image: string;
+};
+
+const FOOD_CARDS: PopularFoodCard[] = [
   {
     id: 1,
     name: "Chicken Momo",
@@ -34,6 +46,29 @@ const FOOD_CARDS = [
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { data: menusData } = useGetAllMenusQuery();
+  const firstCategoryId = menusData?.data?.[0]?.categories?.[0]?.id;
+  const categoryName =
+    menusData?.data?.[0]?.categories?.[0]?.name ||
+    menusData?.data?.[0]?.name ||
+    "Popular";
+  const { data: menuItemsData } = useGetMenuItemsForCategoryQuery(firstCategoryId ?? "", {
+    skip: !firstCategoryId,
+  });
+
+  const popularFoods: PopularFoodCard[] =
+    menuItemsData?.data && menuItemsData.data.length > 0
+      ? menuItemsData.data.slice(0, 3).map((item: MenuItem) => ({
+          id: item.id,
+          name: item.name,
+          category: categoryName,
+          rating: 4.7,
+          time: "20-30 min",
+          image:
+            item.imageUrl ||
+            "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&q=80",
+        }))
+      : FOOD_CARDS;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -70,7 +105,7 @@ const Landing = () => {
         <h2 className="text-3xl font-bold text-gray-900 mb-8">Popular Foods</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FOOD_CARDS.map((food) => (
+          {popularFoods.map((food) => (
             <div
               key={food.id}
               className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300"

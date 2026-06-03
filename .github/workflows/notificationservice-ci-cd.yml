@@ -1,0 +1,40 @@
+name: Notification Service CI/CD
+
+on:
+  push:
+    paths:
+      - notification-service/**
+    branches: develop
+  pull_request:
+    branches: [develop]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: notification-service
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:unit
+
+  docker:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/serveio-notificationservice-api:latest ./notification-service
+      - run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/serveio-notificationservice-api:latest

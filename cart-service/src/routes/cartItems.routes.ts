@@ -100,7 +100,7 @@ cartItemsRouter.get("/summary", authenticate, getCartSummaryHandler);
  *         required: true
  *         schema:
  *           type: string
- *         description: Menu item ID
+ *         description: Cart item record ID
  *     requestBody:
  *       required: true
  *       content:
@@ -135,7 +135,7 @@ cartItemsRouter.put("/items/:itemId", authenticate, updateItemHandler);
  *         required: true
  *         schema:
  *           type: string
- *         description: Menu item ID
+ *         description: Cart item record ID
  *     responses:
  *       200:
  *         description: Item removed successfully

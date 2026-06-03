@@ -6,7 +6,7 @@ export interface UpdateItemInput {
 
 export const updateItemService = async (
   userId: number,
-  itemId: string,
+  cartItemId: string,
   input: UpdateItemInput,
 ) => {
   // Find user's cart
@@ -18,10 +18,10 @@ export const updateItemService = async (
     throw new Error("Cart not found");
   }
 
-  // Find the cart item
+  // Find the cart item by cart item record ID
   const cartItem = await prisma.cartItem.findFirst({
     where: {
-      itemId: itemId,
+      id: cartItemId,
       cartId: cart.id,
     },
   });

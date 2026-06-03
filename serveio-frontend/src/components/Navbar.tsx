@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { Home, Menu, ShoppingCart, User } from "lucide-react";
+import { Home, Menu, ShoppingCart, User, Bell, Package } from "lucide-react";
 
 import { useAppSelector } from "@/App/hooks/hooks";
+import { useGetCartQuery } from "@/App/apis/cartApi";
 
 import {
   Sheet,
@@ -14,10 +15,12 @@ import {
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const unreadCount = useAppSelector((state) => state.notifications.unreadCount);
+  const { data: cartData } = useGetCartQuery(undefined, { skip: !isAuthenticated });
 
-  const cartItems = useAppSelector((state) => state.cart.items);
-
-  const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const cartItems = (cartData?.data?.items ?? []) as Array<{ quantity: number }>;
+  const cartCount = cartItems.reduce((acc: number, item) => acc + item.quantity, 0);
 
   const navlinks = [
     {
@@ -25,7 +28,27 @@ const Navbar = () => {
       path: "/",
       icon: <Home size={20} />,
     },
+    {
+      name: "Orders",
+      path: "/orders",
+      icon: <Package size={20} />,
+    },
+    {
+      name: "Notifications",
+      path: "/notifications",
+      icon: (
+        <div className="relative">
+          <Bell size={20} />
 
+          {/* BADGE */}
+          {unreadCount > 0 && (
+            <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs font-semibold text-white">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </div>
+      ),
+    },
     {
       name: "Cart",
       path: "/cart",
@@ -66,10 +89,10 @@ const Navbar = () => {
           <div
             key={nav.path}
             onClick={() => navigate(nav.path)}
-            className="flex cursor-pointer items-center gap-2 font-medium text-gray-700 transition hover:text-red-600"
+            className="relative flex cursor-pointer items-center justify-center transition hover:text-red-600"
+            title={nav.name}
           >
             {nav.icon}
-            {nav.name}
           </div>
         ))}
       </div>
