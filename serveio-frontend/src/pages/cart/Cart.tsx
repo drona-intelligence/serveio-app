@@ -4,6 +4,7 @@ import {
   useRemoveFromCartMutation,
   useUpdateCartItemMutation,
 } from "@/App/apis/cartApi";
+import { useGetMenuItemByIdQuery } from "@/App/apis/menuItemsApi";
 import { useCreateOrderMutation } from "@/App/apis/orderApi";
 
 import { toast } from "sonner";
@@ -32,6 +33,34 @@ type CartItemResponse = {
   quantity: number;
   description?: string | null;
   imageUrl?: string | null;
+};
+
+const CartItemImage = ({
+  itemId,
+  imageUrl,
+  name,
+}: {
+  itemId: string;
+  imageUrl?: string | null;
+  name: string;
+}) => {
+  const { data } = useGetMenuItemByIdQuery(itemId, {
+    skip: Boolean(imageUrl),
+  });
+
+  const resolvedImageUrl = imageUrl?.trim()
+    ? imageUrl
+    : data?.data?.imageUrl?.trim()
+    ? data.data.imageUrl
+    : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c";
+
+  return (
+    <img
+      src={resolvedImageUrl}
+      alt={name}
+      className="w-full md:w-28 h-28 object-cover rounded-lg"
+    />
+  );
 };
 
 const Cart = () => {
@@ -218,13 +247,10 @@ const Cart = () => {
         {cartItems.map((item) => (
           <Card key={item.id} className="overflow-hidden">
             <CardContent className="p-4 flex flex-col md:flex-row gap-4 md:items-center">
-              <img
-                src={
-                  item.imageUrl ||
-                  "https://images.unsplash.com/photo-1546069901-ba9599a7e63c"
-                }
-                alt={item.name}
-                className="w-full md:w-28 h-28 object-cover rounded-lg"
+              <CartItemImage
+                itemId={item.itemId}
+                imageUrl={item.imageUrl}
+                name={item.name}
               />
 
               <div className="flex-1 space-y-1">
