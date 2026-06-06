@@ -6,6 +6,8 @@ import Login from "@/pages/login/Login";
 import Menu from "@/pages/menu/Menu";
 import MenuItems from "@/pages/menuitems/MenuItems";
 import NotFound from "@/pages/notfound/Notfound";
+import Notifications from "@/pages/notifications/Notifications";
+import Orders from "@/pages/orders/Orders";
 import Profile from "@/pages/profile/Profile";
 import Updateprofile from "@/pages/profile/Updateprofile";
 import Register from "@/pages/register/Register";
@@ -21,7 +23,6 @@ export const Approutes = () => {
         { path: "dashboard", element: <Dashboard /> },
         { path: "login", element: <Login /> },
         { path: "register", element: <Register /> },
-        { path: "*", element: <NotFound /> },
 
         {
           element: <RootLayout />,
@@ -35,9 +36,12 @@ export const Approutes = () => {
             { path: "profile", element: <Profile /> },
             { path: "profile/edit", element: <Updateprofile /> },
             { path: "cart", element: <Cart /> },
-            { path: "*", element: <NotFound /> },
+            { path: "orders", element: <Orders /> },
+            { path: "notifications", element: <Notifications /> },
           ],
         },
+
+        { path: "*", element: <NotFound /> },
       ],
     },
   ]);

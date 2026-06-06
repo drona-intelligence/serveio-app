@@ -1,11 +1,18 @@
 import "dotenv/config";
-import app from "./app.js";
+import { createServer } from "http";
 import { notificationWorker } from "./config/worker.js";
 import { redisConnection } from "./config/redis.js";
+import { app } from "./app.js";
+import { initSocket } from "./config/socket.js";
 
 const PORT = process.env.PORT || 3004;
 
-const server = app.listen(PORT, async () => {
+// One HTTP server wrapping Express — Socket.IO attaches to this
+export const httpServer = createServer(app);
+
+export const io = initSocket(httpServer);
+
+httpServer.listen(PORT, () => {
   console.log(`\n${"=".repeat(50)}`);
   console.log("🎉 Notification Service Started");
   console.log(`${"=".repeat(50)}`);
@@ -20,8 +27,7 @@ const server = app.listen(PORT, async () => {
 // Graceful shutdown
 process.on("SIGTERM", async () => {
   console.log("\n⏹️  SIGTERM received, shutting down gracefully...");
-  
-  server.close(async () => {
+  httpServer.close(async () => {
     console.log("🛑 Server closed");
   });
 
@@ -44,8 +50,7 @@ process.on("SIGTERM", async () => {
 
 process.on("SIGINT", async () => {
   console.log("\n⏹️  SIGINT received, shutting down gracefully...");
-  
-  server.close(async () => {
+  httpServer.close(async () => {
     console.log("🛑 Server closed");
   });
 
@@ -65,5 +70,3 @@ process.on("SIGINT", async () => {
 
   process.exit(0);
 });
-
-export default server;

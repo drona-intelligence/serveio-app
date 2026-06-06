@@ -87,7 +87,7 @@ const Menu = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{menu.categories.length} categories</span>
+                  <span>{menu.categories?.length ?? 0} categories</span>
                   <ChevronRight className="w-4 h-4" />
                 </div>
               </CardContent>

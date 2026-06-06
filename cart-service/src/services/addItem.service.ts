@@ -7,7 +7,7 @@ export interface AddItemInput {
   quantity: number;
 }
 
-export const addItemService = async (userId: number, input: AddItemInput) => {
+export const addItemService = async (userId: string, input: AddItemInput) => {
   let cart = await prisma.cart.findUnique({
     where: { userId },
   });

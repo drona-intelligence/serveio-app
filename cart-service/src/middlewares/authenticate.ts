@@ -21,7 +21,7 @@ export const authenticate = (
 
   try {
     const payload = verifyAccessToken(token);
-    req.user = { userId: Number(payload.userId) };
+    req.user = { userId: payload.userId };
     next();
   } catch (error) {
     return res.status(401).json(apiError("Invalid token", 401));

@@ -13,7 +13,7 @@ export interface CartSummary {
   cartTotal: number;
 }
 
-export const getCartSummaryService = async (userId: number): Promise<CartSummary> => {
+export const getCartSummaryService = async (userId: string): Promise<CartSummary> => {
   // Find user's cart with items
   const cart = await prisma.cart.findUnique({
     where: { userId },

@@ -20,6 +20,7 @@ export interface OrderCreatedEvent {
 export interface OrderStatusUpdatedEvent {
   eventType: "ORDER_STATUS_UPDATED";
   orderId: string;
+  userId: number;
   status: "PENDING" | "CONFIRMED" | "PREPARING" | "READY" | "COMPLETED" | "CANCELLED";
   previousStatus?: "PENDING" | "CONFIRMED" | "PREPARING" | "READY" | "COMPLETED" | "CANCELLED";
   updatedAt: string;
