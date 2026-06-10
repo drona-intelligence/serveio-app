@@ -1,5 +1,6 @@
 import { Worker } from "bullmq";
 import { redisConnection } from "./redis.js";
+import { io } from "../server.js";           // ← the shared io instance
 import type { OrderEvent } from "../types/events.js";
 import { EventType } from "../types/events.js";
 
@@ -9,77 +10,75 @@ export const notificationWorker = new Worker<OrderEvent>(
   QUEUE_NAME,
   async (job) => {
     console.log(`\n📨 Processing notification job: ${job.id}`);
-    console.log(`📦 Job name: ${job.name}`);
-    console.log(`⏰ Timestamp: ${new Date().toISOString()}`);
 
     try {
       const eventData = job.data;
 
       if (job.name === EventType.ORDER_CREATED) {
         const { orderId, userId, items, totalAmount } = eventData as any;
-        
+
         console.log("\n🎉 ORDER CREATED NOTIFICATION");
         console.log(`   Order ID: ${orderId}`);
-        console.log(`   User ID: ${userId}`);
-        console.log(`   Total Amount: $${totalAmount.toFixed(2)}`);
-        console.log(`   Items: ${items.length}`);
-        
-        items.forEach((item: any, index: number) => {
-          console.log(
-            `     ${index + 1}. ${item.name} x${item.quantity} @ $${item.price.toFixed(2)}`
-          );
+
+        // Emit to the specific user's room
+        io.to(`user:${userId}`).emit("order:created", {
+          orderId,
+          totalAmount,
+          itemCount: items.length,
+          message: `Your order #${orderId} has been placed successfully!`,
+          timestamp: new Date().toISOString(),
         });
 
-        // Simulated notification actions
-        console.log("\n✉️  Actions performed:");
-        console.log("   ✓ Email notification sent to customer");
-        console.log("   ✓ SMS notification queued");
-        console.log("   ✓ Push notification sent");
-        console.log("   ✓ Order confirmation logged");
-      } 
-      else if (job.name === EventType.ORDER_STATUS_UPDATED) {
-        const { orderId, status, previousStatus, updatedAt } = eventData as any;
-        
+        console.log(`   ✓ Real-time notification emitted → user:${userId}`);
+
+        // Notify admins when a new order is created
+        io.to("admin").emit("order:created", {
+          orderId,
+          totalAmount,
+          itemCount: items.length,
+          message: `A new order #${orderId} has been placed and needs admin review.`,
+          timestamp: new Date().toISOString(),
+        });
+
+        console.log("   ✓ Real-time order created notification emitted → admin");
+
+      } else if (job.name === EventType.ORDER_STATUS_UPDATED) {
+        const { orderId, userId, status, previousStatus, updatedAt } = eventData as any;
+
         console.log("\n📊 ORDER STATUS UPDATED NOTIFICATION");
         console.log(`   Order ID: ${orderId}`);
         console.log(`   Status: ${previousStatus} → ${status}`);
-        console.log(`   Updated At: ${updatedAt}`);
 
-        // Simulated notification actions based on status
-        console.log("\n✉️  Actions performed:");
-        
-        switch (status) {
-          case "CONFIRMED":
-            console.log("   ✓ Confirmation notification sent");
-            console.log("   ✓ Restaurant kitchen display updated");
-            break;
-          case "PREPARING":
-            console.log("   ✓ Preparation started notification sent");
-            console.log("   ✓ ETA calculated and shared");
-            break;
-          case "READY":
-            console.log("   ✓ Ready for pickup/delivery notification sent");
-            console.log("   ✓ Driver assigned notification (if applicable)");
-            break;
-          case "COMPLETED":
-            console.log("   ✓ Order completed notification sent");
-            console.log("   ✓ Receipt emailed");
-            console.log("   ✓ Review request scheduled");
-            break;
-          case "CANCELLED":
-            console.log("   ✓ Cancellation notification sent");
-            console.log("   ✓ Refund notification queued");
-            break;
-          default:
-            console.log(`   ✓ Status update notification for ${status}`);
+        io.to(`user:${userId}`).emit("order:status_updated", {
+          orderId,
+          status,
+          previousStatus,
+          updatedAt,
+          message: `Order #${orderId} is now ${status}`,
+          timestamp: new Date().toISOString(),
+        });
+
+        console.log(`   ✓ Real-time notification emitted → user:${userId}`);
+
+        if (status === "CANCELLED") {
+          io.to("admin").emit("order:status_updated", {
+            orderId,
+            status,
+            previousStatus,
+            updatedAt,
+            message: `Order #${orderId} has been cancelled and should be reviewed by admin`,
+            timestamp: new Date().toISOString(),
+          });
+          console.log(`   ✓ Real-time cancellation notification emitted → admin`);
         }
-      } 
-      else {
+
+      } else {
         console.log("⚠️  Unknown event type, skipping");
       }
 
       console.log("✅ Notification processed successfully\n");
       return { success: true };
+
     } catch (error) {
       console.error("❌ Error processing notification:", error);
       throw error;
@@ -96,13 +95,11 @@ notificationWorker.on("completed", (job) => {
 });
 
 notificationWorker.on("failed", (job, err) => {
-  console.error(`❌ Job ${job?.id} failed with error: ${err.message}`);
+  console.error(`❌ Job ${job?.id} failed: ${err.message}`);
 });
 
 notificationWorker.on("error", (err) => {
   console.error("❌ Worker error:", err.message);
 });
 
-console.log(`🚀 Notification worker started - listening to "${QUEUE_NAME}" queue`);
-
-export default notificationWorker;
+console.log(`🚀 Notification worker started — listening to "${QUEUE_NAME}" queue`);

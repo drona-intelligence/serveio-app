@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ShoppingCart, UtensilsCrossed } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useGetMenuItemsForCategoryQuery } from "@/App/apis/menuItemsApi";
+import { useAddToCartMutation } from "@/App/apis/cartApi";
 import type { MenuItem } from "@/types/types";
-import { useAppDispatch } from "@/App/hooks/hooks";
-import { addToCart } from "@/App/slices/cartslice";
+import { useAppSelector } from "@/App/hooks/hooks";
 import { toast } from "sonner";
 const MenuItems = () => {
-  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const [addToCart] = useAddToCartMutation();
   const { menuid, categoryid } = useParams();
 
   const { data, isLoading, error } = useGetMenuItemsForCategoryQuery(
@@ -114,19 +116,38 @@ const MenuItems = () => {
 
               <CardContent>
                 <Button
-                  disabled={!item.isAvailable}
+                  disabled={!item.isAvailable || !isAuthenticated}
                   className="w-full gap-2 bg-red-500 hover:bg-red-700"
                   size="sm"
-                  onClick={() => {
-                    dispatch(addToCart(item));
+                  onClick={async () => {
+                    if (!isAuthenticated) {
+                      toast.error("Please log in to add items to your cart.");
+                      navigate("/login");
+                      return;
+                    }
 
-                    toast.success("Item added", {
-                      description: `${item.name} added to cart`,
-                    });
+                    try {
+                      await addToCart({
+                        itemId: item.id,
+                        name: item.name,
+                        price: item.price,
+                        quantity: 1,
+                      }).unwrap();
+
+                      toast.success("Item added", {
+                        description: `${item.name} added to cart`,
+                      });
+                    } catch (err: any) {
+                      toast.error(err?.data?.message || "Failed to add item to cart.");
+                    }
                   }}
                 >
                   <ShoppingCart className="w-4 h-4" />
-                  {item.isAvailable ? "Add to Cart" : "Unavailable"}
+                  {item.isAvailable
+                    ? isAuthenticated
+                      ? "Add to Cart"
+                      : "Login to add"
+                    : "Unavailable"}
                 </Button>
               </CardContent>
             </Card>

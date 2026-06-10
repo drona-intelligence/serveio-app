@@ -24,6 +24,7 @@ export interface OrderCreatedEvent {
 export interface OrderStatusUpdatedEvent {
   eventType: EventType.ORDER_STATUS_UPDATED;
   orderId: string;
+  userId: string;
   status: string;
   previousStatus?: string;
   updatedAt: string;

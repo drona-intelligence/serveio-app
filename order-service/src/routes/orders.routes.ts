@@ -1,6 +1,7 @@
 import express from "express";
 import { createOrderHandler } from "../controllers/createOrder.controller.js";
 import { getOrdersHandler } from "../controllers/getOrders.controller.js";
+import { getAllOrdersHandler } from "../controllers/getAllOrders.controller.js";
 import { getOrderByIdHandler } from "../controllers/getOrderById.controller.js";
 import { updateOrderStatusHandler } from "../controllers/updateOrderStatus.controller.js";
 import { authenticate } from "../middlewares/authenticate.js";
@@ -61,6 +62,37 @@ ordersRouter.post("/", authenticate, createOrderHandler);
  *         description: Unauthorized
  */
 ordersRouter.get("/", authenticate, getOrdersHandler);
+
+/**
+ * @swagger
+ * /api/v1/serveio/orders/all:
+ *   get:
+ *     summary: Get all orders
+ *     description: Retrieve all orders in the system (ADMIN/OWNER only)
+ *     tags:
+ *       - Orders
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: All orders retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - insufficient permissions
+ */
+ordersRouter.get(
+  "/all",
+  authenticate,
+  authorizeRoles("ADMIN", "OWNER"),
+  getAllOrdersHandler,
+);
 
 /**
  * @swagger

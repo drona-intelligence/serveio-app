@@ -64,6 +64,7 @@ export const updateOrderStatusService = async (
   await publishOrderStatusUpdated({
     eventType: "ORDER_STATUS_UPDATED",
     orderId: updatedOrder.id,
+    userId: updatedOrder.userId,
     status: updatedOrder.status,
     previousStatus: order.status,
     updatedAt: updatedOrder.updatedAt.toISOString(),

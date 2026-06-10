@@ -4,7 +4,7 @@ import { swaggerSpec } from "./config/swagger.js";
 // Import routes for Swagger documentation
 import "./routes/docs.js";
 
-const app = express();
+export const app = express();
 
 // Middleware
 app.use(express.json());
@@ -43,4 +43,3 @@ app.use((req: Request, res: Response) => {
   });
 });
 
-export default app;
